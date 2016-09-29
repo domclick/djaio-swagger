@@ -53,4 +53,63 @@ SWAGGER_APP_INFO = {
     }
 }
 ```
+
+
+### HOW TO USE
+
+#### 1. Djaio works with Class-based Views
+So, lets wright some Class-based View:
+
+``` python
+ class RomeoAndJulliet(web.View):
+ 
+    async def get(self):
+        ...some code here...
+        return
+        
+    async def post(self):
+        ...some code here...
+        return
+```
+
+Greate! But what about swagger? Ok. djaio-swagger works with ```__doc__``` of class an class-methods. In class __doc__ you must wright a YAML model description and enclosed it in tags ```<start_YAML>  %YAML_SPEC% <end_YAML>```.
+
+In class-method you must wrigh just a method short and informative description.
+djaio-swagger will automate add a body parameter for PUT and POST methods. For ALL methods it will be automaticly generate in parametrs if it defined in function. On this time djaio-swagger accepts only PATH and BODY parameters.
+It will be looks like:
+
+``` python
+ class RomeoAndJulliet(web.View):
+    """
+    A class with some magic methods
+    <start_YAML>
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int32
+      name:
+        type: string
+    <end_YAML>
+    """
+    
+    async def get(self):
+        """
+        returns a  list
+        """
+        ...some code here...
+        return
+        
+    async def post(self):
+        """
+        creates some thing
+        """
+        ...some code here...
+        return
+```
+
+So, at ```/swagger.json``` you can see the result and use it!
  
