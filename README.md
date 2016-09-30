@@ -1,4 +1,5 @@
 # DJAIO-SWAGGER v0.0.1b
+SO, LET ME SPEAK FROM MY HEATRT...
 
 ```
 djaio-swagger is a battery for djaio-framework. It's replace the default app.router to own
@@ -9,30 +10,14 @@ and generate the json specification of your API in swagger-format.
 
 ### INSTALLATION
 
-#### 1. Checkout last version
-```ToDo: Add an installation description```
-#### 2. Config your application build file.
-
-##### 2.1 Import djaio-swagger 
-*Импортируем djaio-swagger*
-``` python
-import djaio_swagger
+#### 1. Checkout last version from:
+``` sh
+github.com:Sberned/djaio-swagger.git@master#egg=djaio-swagger
 ```
-##### 2.2 In **init_app()** set your application router to **djaio_swagger.TransmuteUrlDispatcher() It will be looks like:**
-*В **init_app()** определяем роутер для нашего приложения как **djaio_swagger.TransmuteUrlDispatcher()***
- ``` python
- app = web.Application(router=djaio_swagger.TransmuteUrlDispatcher())
- ```
-##### After that you must add **djaio_swagger.setup(app)**
-*После этого мы должны добавить строчку:*
-``` !before! return app ```
- ``` python
- djaio_swagger.setup(app)
- ```
 
-
-#### 3 At the end you must config your settings file. An example:
+#### 2 At the end you must config your settings file. An example:
 ```python
+CUSTOM_ROUTER = 'djaio_swagger.TransmuteUrlDispatcher'
 SWAGGER_APP_INFO = {
     'APP_JSON_ROUTE':'/swagger.json',
     'APP_HTML_ROUTE':'/swagger',
@@ -53,6 +38,22 @@ SWAGGER_APP_INFO = {
     }
 }
 ```
+#### 3 Add to **init_app** function in your APP_NAME.__init__.py:
+```python
+djaio_swagger.setup(app)
+```
+It will be looks like:
+
+```python
+def init_app(app):
+    ...
+    
+    djaio_swagger.setup(app)
+    
+    ...
+    return app
+```
+
 
 
 ### HOW TO USE
@@ -74,14 +75,20 @@ So, lets wright some Class-based View:
 
 Greate! But what about swagger? Ok. djaio-swagger works with ```__doc__``` of class an class-methods. In class __doc__ you must wright a YAML model description and enclosed it in tags ```<start_YAML>  %YAML_SPEC% <end_YAML>```.
 
-In class-method you must wrigh just a method short and informative description.
-djaio-swagger will automate add a body parameter for PUT and POST methods. For ALL methods it will be automaticly generate in parametrs if it defined in function. On this time djaio-swagger accepts only PATH and BODY parameters.
+For class-methods you must wright it description in ```<%METHOD_NAME%_desc>  %METHOD_DESC% <end_%METHOD_NAME%_desc>```. 
 It will be looks like:
 
 ``` python
- class RomeoAndJulliet(web.View):
+ class TestAPIView(JsonView):
     """
     A class with some magic methods
+
+
+    <get_desc>This is GET<end_get_desc>
+    <post_desc>This is POST<end_post_desc>
+    <put_desc>This is PUT<end_put_desc>
+    <delete_desc>THIS IS DELETE<end_delete_desc>
+
     <start_YAML>
     type: object
     required:
@@ -95,20 +102,11 @@ It will be looks like:
         type: string
     <end_YAML>
     """
-    
-    async def get(self):
-        """
-        returns a  list
-        """
-        ...some code here...
-        return
-        
-    async def post(self):
-        """
-        creates some thing
-        """
-        ...some code here...
-        return
+
+    get_method = methods.Testmethod()
+    post_method = methods.Testmethod()
+    put_method = methods.Testmethod()
+    delete_method = methods.Testmethod()
 ```
 
 So, at ```/swagger.json``` you can see the result and use it!
