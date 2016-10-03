@@ -28,9 +28,6 @@ class TransmuteUrlDispatcher(UrlDispatcher):
         if not doc:
             return {}
         try:
-            start = str("<start_YAML>")
-            end = str("<end_YAML>")
-            doc = re.search('%s(.*)%s' % (start, end), doc, re.DOTALL).group(1)
             doc = yaml.load(doc) if doc else {}
         # ToDo Need to add logging here!
         except ValueError:

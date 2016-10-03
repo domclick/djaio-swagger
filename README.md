@@ -59,7 +59,7 @@ So, let's write some Class-based View:
     delete_method = methods.Testmethod()
 ```
 
-Great! But what about swagger? Ok. Djaio-swagger works with `__doc__` of class and methods. In class `__doc__` write YAML model description and enclose it in tags `<start_YAML>  %YAML_SPEC% <end_YAML>`.
+Great! But what about swagger? Ok. Djaio-swagger works with `__doc__` of class. In class `__doc__` write YAML model description.
 
 It will be looks like:
 
@@ -67,9 +67,6 @@ It will be looks like:
 ``` python
  class TestAPIView(JsonView):
     """
-    A class with some magic methods
-
-    <start_YAML>
     methods:
         get: This is GET
         post: This is POST
@@ -86,7 +83,6 @@ It will be looks like:
             format: int32
           name:
             type: string
-    <end_YAML>
     """
 
     get_method = methods.Testmethod()
