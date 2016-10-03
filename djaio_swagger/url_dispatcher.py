@@ -41,22 +41,6 @@ class TransmuteUrlDispatcher(UrlDispatcher):
             pass
         return doc
 
-    def get_method_swagger_doc(self, handler, method):
-        handler_doc = handler.__doc__
-        if not handler_doc:
-            return ''
-        method = method.lower()
-        try:
-            start = str("<{}_desc>".format(method))
-            end = str("<end_{}_desc>".format(method))
-            doc = re.search('%s(.*)%s' % (start, end), handler_doc, re.DOTALL).group(1)
-            return doc
-        # ToDo Need to add logging here!
-        except ValueError:
-            pass
-        except AttributeError:
-            pass
-
     def add_route(self, method, path, handler, *, name=None, expect_handler=None):
         """
         Replace a base add_route to own for ClassBasedViews.
@@ -69,7 +53,9 @@ class TransmuteUrlDispatcher(UrlDispatcher):
         """
         # Check if handler is class
         if inspect.isclass(handler):
-            swagger_dict = self.get_swagger_dict(handler)
+            _swagger_dict = self.get_swagger_dict(handler)
+            swagger_model = _swagger_dict.get('model', {})
+            swagger_methods = _swagger_dict.get('methods', {})
             if type(method) == str:
                 method = [method]
 
@@ -78,8 +64,8 @@ class TransmuteUrlDispatcher(UrlDispatcher):
                 obj = dict((inspect.getmembers(handler, predicate=inspect.isfunction))).get(m_lower, None)
                 if obj:
                     # Here we set our methods description from a ClassBasedView __doc__
-                    setattr(obj,'swagger_dict', swagger_dict)
-                    setattr(obj, '__doc__', self.get_method_swagger_doc(handler, m_lower))
+                    setattr(obj,'swagger_dict', swagger_model)
+                    setattr(obj, '__doc__', swagger_methods.get(m_lower))
 
                     describe(methods=method, paths=path)(obj)
                     transmute_func = DjaioTransmuteFunction(obj, args_not_from_request=["request"])

@@ -61,7 +61,6 @@ So, let's write some Class-based View:
 
 Great! But what about swagger? Ok. Djaio-swagger works with `__doc__` of class and methods. In class `__doc__` write YAML model description and enclose it in tags `<start_YAML>  %YAML_SPEC% <end_YAML>`.
 
-For class-methods you must wright description in ```<%METHOD_NAME%_desc>  %METHOD_DESC% <end_%METHOD_NAME%_desc>```. 
 It will be looks like:
 
 
@@ -70,22 +69,23 @@ It will be looks like:
     """
     A class with some magic methods
 
-    <get_desc>This is GET<end_get_desc>
-    <post_desc>This is POST<end_post_desc>
-    <put_desc>This is PUT<end_put_desc>
-    <delete_desc>THIS IS DELETE<end_delete_desc>
-
     <start_YAML>
-    type: object
-    required:
-      - id
-      - name
-    properties:
-      id:
-        type: integer
-        format: int32
-      name:
-        type: string
+    methods:
+        get: This is GET
+        post: This is POST
+        put: This is PUT
+        delete: This is DELETE
+    model:
+        type: object
+        required:
+          - id
+          - name
+        properties:
+          id:
+            type: integer
+            format: int32
+          name:
+            type: string
     <end_YAML>
     """
 
