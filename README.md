@@ -59,33 +59,16 @@ So, let's write some Class-based View:
     delete_method = methods.Testmethod()
 ```
 
-Great! But what about swagger? Ok. Djaio-swagger works with `__doc__` of class. In class `__doc__` write YAML model description.
+Great! But what about swagger? Ok. Djaio-swagger works with IN method params like in *get_method*.
+You must write an Input and Output models(use *schematics* - http://schematics.readthedocs.io/), and set description
 
 It will be looks like:
 
 
 ``` python
  class TestAPIView(JsonView):
-    """
-    methods:
-        get: This is GET
-        post: This is POST
-        put: This is PUT
-        delete: This is DELETE
-    model:
-        type: object
-        required:
-          - id
-          - name
-        properties:
-          id:
-            type: integer
-            format: int32
-          name:
-            type: string
-    """
-
-    get_method = methods.Testmethod()
+    get_method = methods.Testmethod(input_model=SomeInModel(), output_model=SomeOutModel()
+                                    description="My cool method!")
     post_method = methods.Testmethod()
     put_method = methods.Testmethod()
     delete_method = methods.Testmethod()
