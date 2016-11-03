@@ -99,7 +99,6 @@ class DjaioTransmuteFunction(TransmuteFunction):
             }))
 
         for name, details in self.parameters.query.items():
-            print(name, details)
             parameters.append(QueryParameter({
                 "name": name,
                 "required": details.default is None,
