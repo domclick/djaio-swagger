@@ -99,6 +99,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
             }))
 
         for name, details in self.parameters.query.items():
+            print(name, details)
             parameters.append(QueryParameter({
                 "name": name,
                 "required": details.default is None,
@@ -133,9 +134,13 @@ class DjaioTransmuteFunction(TransmuteFunction):
 
                 if not p in list(self.parameters.path.keys()):
                     field = getattr(self.input_model, p)
-                    parameters.append(QueryParameter({
+                    param_type = context.serializers.to_json_schema(field).get('type', 'string')
+                    param = QueryParameter({
                         "name": field.name,
                         "required": False,
-                        "type": context.serializers.to_json_schema(field).get('type', 'string')
-                    }))
+                        "type": param_type,
+                    })
+                    if param_type == 'array':
+                        param.collectionFormat = 'multi'
+                    parameters.append(param)
         return parameters
