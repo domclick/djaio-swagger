@@ -16,7 +16,7 @@ class TransmuteUrlDispatcher(UrlDispatcher):
     METHODS = ('get', 'post', 'put', 'delete')
 
     def __init__(self, *args, context=default_context, **kwargs):
-        super(TransmuteUrlDispatcher, self).__init__()
+        super(TransmuteUrlDispatcher, self).__init__(None)
         self._transmute_context = context
         self._swagger = {}
 
