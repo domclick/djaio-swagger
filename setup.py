@@ -15,7 +15,7 @@ install_requires = [
 tests_require = []
 
 setup(name='djaio-swagger',
-      version='0.0.2b',
+      version='0.0.3b',
       description='The battery to generate additional swagger-spec json routes for '
                   'your ClassBasedView methods (get,post,put,delete). Based on aiothh-transmute app by Yusuke Tsutsumi.',
       long_description=open(README_PATH).read(),
