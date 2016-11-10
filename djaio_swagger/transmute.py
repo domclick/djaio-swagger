@@ -145,7 +145,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
 
                     if param_type == 'array':
                         param.collectionFormat = 'multi'
-                    if param_type == 'string':
+                    if param_type in ('string', 'number'):
                         if hasattr(field, 'choices') and field.choices:
                             param.enum = list(field.choices)
 
