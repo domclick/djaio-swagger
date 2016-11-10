@@ -15,8 +15,10 @@ class DjaioTransmuteFunction(TransmuteFunction):
     BODY_METHODS = ('post', 'put')
     QUERY_METHODS = ('get', )
 
-    def __init__(self, func, method, method_func, args_not_from_request=None):
+    def __init__(self, func, method, method_func, name=None, args_not_from_request=None):
         super().__init__(func, args_not_from_request=args_not_from_request)
+        tagname = name.split(':')
+        self.tag, self.name = tagname if len(tagname)>1 else ['api_default', name]
         self.current_method = method
         self.method_func = method_func
         self.input_model = getattr(self.method_func, 'input_model', None)
@@ -29,7 +31,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
         """
         consumes = produces = ('application/json',)
         operation_dict = {
-            'tags':[self.paths.copy().pop()],
+            'tags':[self.tag],
             "summary": self.description,
             "description": self.description,
             "consumes": consumes,
@@ -138,8 +140,15 @@ class DjaioTransmuteFunction(TransmuteFunction):
                         "name": field.name,
                         "required": False,
                         "type": param_type,
+                        "default":field.default,
                     })
+
                     if param_type == 'array':
                         param.collectionFormat = 'multi'
+                    if param_type in ('string', 'number'):
+                        if hasattr(field, 'choices') and field.choices:
+                            param.enum = list(field.choices)
+
+
                     parameters.append(param)
         return parameters
