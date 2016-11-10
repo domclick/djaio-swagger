@@ -24,12 +24,12 @@ class TransmuteUrlDispatcher(UrlDispatcher):
         doc = getattr(handler, '__doc__')
         return yaml.load(doc) if doc else {}
 
-    def add_to_swagger(self, handler, path):
+    def add_to_swagger(self, handler, path, name):
         for m in self.METHODS:
             method_func = getattr(handler, '{}_method'.format(m), None)
             if method_func:
                 describe(methods=m, paths=path)(handler)
-                transmute_func = DjaioTransmuteFunction(handler, m, method_func, args_not_from_request=["request"])
+                transmute_func = DjaioTransmuteFunction(handler, m, method_func, name=name, args_not_from_request=["request"])
                 swagger_path = transmute_func.get_swagger_path(self._transmute_context)
                 #add to swagger
                 if path not in self._swagger:
@@ -47,7 +47,7 @@ class TransmuteUrlDispatcher(UrlDispatcher):
                 methods = [methods]
             for m in methods:
                 resource.add_route(m, handler, expect_handler=expect_handler)
-            self.add_to_swagger(handler, path)
+            self.add_to_swagger(handler, path, name)
         else:
             super().add_route(methods, path, handler, name=name,expect_handler=expect_handler)
 
