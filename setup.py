@@ -8,14 +8,14 @@ README_PATH = os.path.join(base, "README.rst")
 
 install_requires = [
     'transmute-core>=0.2.2',
-    'aiohttp',
+    'aiohttp==1.0.5',
     'PyYAML<=4',
 ]
 
 tests_require = []
 
 setup(name='djaio-swagger',
-      version='0.0.3b',
+      version='0.0.5',
       description='The battery to generate additional swagger-spec json routes for '
                   'your ClassBasedView methods (get,post,put,delete). Based on aiothh-transmute app by Yusuke Tsutsumi.',
       long_description=open(README_PATH).read(),
