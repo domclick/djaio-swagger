@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 base = os.path.dirname(os.path.abspath(__file__))
 
 install_requires = [
-    'transmute-core>=0.2.2',
+    'transmute-core==0.3.1',
     'aiohttp==1.0.5',
     'PyYAML<=4',
 ]
