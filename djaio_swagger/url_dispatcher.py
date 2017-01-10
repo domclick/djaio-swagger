@@ -25,8 +25,9 @@ class TransmuteUrlDispatcher(UrlDispatcher):
         return yaml.load(doc) if doc else {}
 
     def add_to_swagger(self, handler, path, name):
+        _instance = handler(None)
         for m in self.METHODS:
-            method_func = getattr(handler, '{}_method'.format(m), None)
+            method_func = getattr(_instance, '{}_method'.format(m), None)
             if method_func:
                 describe(methods=m, paths=path)(handler)
                 transmute_func = DjaioTransmuteFunction(handler, m, method_func, name=name, args_not_from_request=["request"])
