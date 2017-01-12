@@ -58,6 +58,7 @@ def create_swagger_json_handler(app, app_info=None):
     spec = Swagger({
         "info": Info(app_info if app_info else _defailt_app_info),
         "paths": app.router.swagger_paths(),
+        "schemes": app_info.get("APP_SCHEME", ['http']),
         "swagger": "2.0",
 
     })
