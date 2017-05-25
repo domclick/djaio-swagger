@@ -11,12 +11,12 @@ class DjaioTransmuteFunction(TransmuteFunction):
     Class based on transmute_core.TransmuteFunction adaptived for Djaio
     """
     BODY_METHODS = ('post', 'put')
-    QUERY_METHODS = ('get', )
+    QUERY_METHODS = ('get',)
 
     def __init__(self, func, method, method_func, name=None, args_not_from_request=None):
         super().__init__(func, args_not_from_request=args_not_from_request)
         tagname = name.split(':') if name else [method_func.__class__.__name__, method_func.__class__.__name__]
-        self.tag, self.name = tagname if len(tagname)>1 else ['api_default', name]
+        self.tag, self.name = tagname if len(tagname) > 1 else ['api_default', name]
         self.current_method = method
         self.method_func = method_func
         self.input_model = getattr(self.method_func, 'input_model', None)
@@ -29,7 +29,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
         """
         consumes = produces = ('application/json',)
         operation_dict = {
-            'tags':[self.tag],
+            'tags': [self.tag],
             "summary": self.description,
             "description": self.description,
             "consumes": consumes,
@@ -43,7 +43,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
         }
 
         scheme = self.get_swagger_scheme(model=self.output_model)
-        if scheme.to_primitive() !={}:
+        if scheme.to_primitive() != {}:
             operation_dict['responses']['200']['schema'] = scheme
         return Operation(operation_dict)
 
@@ -76,7 +76,6 @@ class DjaioTransmuteFunction(TransmuteFunction):
             raise ValueError('Error! Your YAML description is not valid! See the docs here: {docs}\n{scheme}'.
                              format(scheme=scheme, docs='http://swagger.io/specification/#schemaObject'))
 
-
     def _is_path_parameter(self, p):
         return p in list(self.parameters.path.keys())
 
@@ -91,31 +90,6 @@ class DjaioTransmuteFunction(TransmuteFunction):
                 "required": True,
                 "type": context.serializers.to_json_schema(details.type) if details else 'string',
             }))
-
-        # DEPRECATED! REMOVE IT AFTER NEXT 2 RELEASES
-
-        # # Create body IN params
-        # for name, details in self.parameters.body.items():
-        #     parameters.append(BodyParameter({
-        #         "name": name,
-        #         "description": name,
-        #         "required": details.default is None,
-        #         "schema": context.serializers.to_json_schema(details.type) if details else 'string',
-        #     }))
-        #
-        # for name, details in self.parameters.query.items():
-        #     parameters.append(QueryParameter({
-        #         "name": name,
-        #         "required": details.default is None,
-        #         "type": "string"
-        #     }))
-        #
-        # for name, details in self.parameters.header.items():
-        #     parameters.append(HeaderParameter({
-        #         "name": name,
-        #         "required": details.default is None,
-        #         "type": "string"
-        #     }))
 
         if self.current_method in self.BODY_METHODS:
             # Create here a constant field for methods of post and put
@@ -139,7 +113,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
                         "name": field.name,
                         "required": False,
                         "type": param_type,
-                        "default":field.default,
+                        "default": field.default,
                     })
 
                     if param_type == 'array':
