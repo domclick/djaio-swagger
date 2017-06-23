@@ -1,9 +1,12 @@
+from schematics import Model, types
 from schematics.exceptions import DataError
-from swagger_schema import HeaderParameter
-from swagger_schema import QueryParameter
 from transmute_core.function import TransmuteFunction
-from swagger_schema import (Operation, Schema, PathParameter, BodyParameter)
+from swagger_schema import (Operation, Schema, PathParameter, BodyParameter, QueryParameter, HeaderParameter)
 from transmute_core.context import default_context
+
+
+class DefaultApiWrapper(Model):
+    success = types.BooleanType(default=True)
 
 
 class DjaioTransmuteFunction(TransmuteFunction):
@@ -27,7 +30,9 @@ class DjaioTransmuteFunction(TransmuteFunction):
         """
         get the swagger_schema operation representation.
         """
+
         consumes = produces = ('application/json',)
+
         operation_dict = {
             'tags': [self.tag],
             "summary": self.description,
@@ -39,10 +44,32 @@ class DjaioTransmuteFunction(TransmuteFunction):
                 "200": {
                     "description": "successful operation",
                 },
+                "400": {
+                    "description": "Bad request, invalid input parameters",
+                },
+                "401": {
+                    "description": "Unauthorized",
+                },
+                "403": {
+                    "description": "Forbidden",
+                },
+                "409": {
+                    "description": "Conflict: Object already exists",
+                },
+                "429": {
+                    "description": "Too many requests",
+                },
+                "500": {
+                    "description": "Server error",
+                }
             }
         }
 
-        scheme = self.get_swagger_scheme(model=self.output_model)
+        class Wrapper(DefaultApiWrapper):
+            result = types.ModelType(self.output_model)
+
+        scheme = self.get_swagger_scheme(model=Wrapper)
+
         if scheme.to_primitive() != {}:
             operation_dict['responses']['200']['schema'] = scheme
         return Operation(operation_dict)
