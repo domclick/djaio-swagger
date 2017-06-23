@@ -8,17 +8,15 @@ from transmute_core.context import default_context
 
 class DjaioTransmuteFunction(TransmuteFunction):
     """
-    Class based on TransmuteFunction.
-    For our realies we rebuild it's main functions and adapt it
-    for djaio and ClassBasedView architecture
+    Class based on transmute_core.TransmuteFunction adaptived for Djaio
     """
     BODY_METHODS = ('post', 'put')
-    QUERY_METHODS = ('get', )
+    QUERY_METHODS = ('get',)
 
     def __init__(self, func, method, method_func, name=None, args_not_from_request=None):
         super().__init__(func, args_not_from_request=args_not_from_request)
-        tagname = name.split(':')
-        self.tag, self.name = tagname if len(tagname)>1 else ['api_default', name]
+        tagname = name.split(':') if name else [method_func.__class__.__name__, method_func.__class__.__name__]
+        self.tag, self.name = tagname if len(tagname) > 1 else ['api_default', name]
         self.current_method = method
         self.method_func = method_func
         self.input_model = getattr(self.method_func, 'input_model', None)
@@ -31,7 +29,7 @@ class DjaioTransmuteFunction(TransmuteFunction):
         """
         consumes = produces = ('application/json',)
         operation_dict = {
-            'tags':[self.tag],
+            'tags': [self.tag],
             "summary": self.description,
             "description": self.description,
             "consumes": consumes,
@@ -45,17 +43,16 @@ class DjaioTransmuteFunction(TransmuteFunction):
         }
 
         scheme = self.get_swagger_scheme(model=self.output_model)
-        if scheme.to_primitive() !={}:
+        if scheme.to_primitive() != {}:
             operation_dict['responses']['200']['schema'] = scheme
         return Operation(operation_dict)
 
     def get_swagger_scheme(self, model, context=default_context):
         """
         function try to build swagger-json by Scheme Model.
-        If dict of data has wrong format in raise an error.
+        If data is wrong raise an error.
         :return Scheme object:
         """
-
         scheme = {
             'required': [],
             'type': 'object',
@@ -64,13 +61,14 @@ class DjaioTransmuteFunction(TransmuteFunction):
         }
         if model:
             for f in model().keys():
-                field = getattr(model, f)
-                if field.required:
-                    scheme['required'].append(f)
-                try:
-                    scheme['properties'][f] = context.serializers.to_json_schema(field)
-                except:
-                    scheme['properties'][f] = {'type': 'string'}
+                if not self._is_path_parameter(f):
+                    field = getattr(model, f)
+                    if field.required:
+                        scheme['required'].append(f)
+                    try:
+                        scheme['properties'][f] = context.serializers.to_json_schema(field)
+                    except:
+                        scheme['properties'][f] = {'type': 'string'}
 
         try:
             return Schema(scheme)
@@ -78,18 +76,11 @@ class DjaioTransmuteFunction(TransmuteFunction):
             raise ValueError('Error! Your YAML description is not valid! See the docs here: {docs}\n{scheme}'.
                              format(scheme=scheme, docs='http://swagger.io/specification/#schemaObject'))
 
+    def _is_path_parameter(self, p):
+        return p in list(self.parameters.path.keys())
 
     def _get_swagger_parameters(self, context=default_context):
         parameters = []
-
-        # Create body IN params
-        for name, details in self.parameters.body.items():
-            parameters.append(BodyParameter({
-                "name": name,
-                "description": name,
-                "required": details.default is None,
-                "schema": context.serializers.to_json_schema(details.type) if details else 'string',
-            }))
 
         # Create path IN params
         for name, details in self.parameters.path.items():
@@ -99,22 +90,6 @@ class DjaioTransmuteFunction(TransmuteFunction):
                 "required": True,
                 "type": context.serializers.to_json_schema(details.type) if details else 'string',
             }))
-
-        for name, details in self.parameters.query.items():
-            parameters.append(QueryParameter({
-                "name": name,
-                "required": details.default is None,
-                "type": "string"
-            }))
-
-        for name, details in self.parameters.header.items():
-            parameters.append(HeaderParameter({
-                "name": name,
-                "required": details.default is None,
-                "type": "string"
-            }))
-
-
 
         if self.current_method in self.BODY_METHODS:
             # Create here a constant field for methods of post and put
@@ -129,18 +104,16 @@ class DjaioTransmuteFunction(TransmuteFunction):
                 body.schema = scheme
             parameters.append(body)
 
-
         if self.current_method in self.QUERY_METHODS and self.input_model:
             for p in self.input_model().keys():
-
-                if not p in list(self.parameters.path.keys()):
+                if not self._is_path_parameter(p):
                     field = getattr(self.input_model, p)
                     param_type = context.serializers.to_json_schema(field).get('type', 'string')
                     param = QueryParameter({
                         "name": field.name,
                         "required": False,
                         "type": param_type,
-                        "default":field.default,
+                        "default": field.default,
                     })
 
                     if param_type == 'array':
@@ -148,7 +121,6 @@ class DjaioTransmuteFunction(TransmuteFunction):
                     if param_type in ('string', 'number'):
                         if hasattr(field, 'choices') and field.choices:
                             param.enum = list(field.choices)
-
-
                     parameters.append(param)
+
         return parameters
