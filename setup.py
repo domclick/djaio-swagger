@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 base = os.path.dirname(os.path.abspath(__file__))
 
 install_requires = [
-    'transmute-core==0.3.1',
+    'transmute-core==1.13.5',
     'PyYAML<=4',
     'swagger-schema==0.2.0',
 ]
